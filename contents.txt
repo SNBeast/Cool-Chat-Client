@@ -1,0 +1,8 @@
+Client.class
+Client$Closer.class
+Message.class
+Server.class
+Server$ConnectedClient.class
+Server$ServerShell.class
+Updater.class
+changelog.txt

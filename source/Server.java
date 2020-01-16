@@ -31,12 +31,13 @@ public class Server {
 			clients.get(i).sendMessageTo(message);
 		}
 	}
-	public static void main (String[] args) {
-		try {
-			new Server(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
-		} catch (Exception e) {
-			System.out.println("Usage: Server port maxClients");
+	private boolean checkName (String name) {
+		for (int i = 0; i < clients.size(); i++) {
+			if (clients.get(i).name.toLowerCase().equals(name.toLowerCase())) {
+				return false;
+			}
 		}
+		return true;
 	}
 	private class ServerShell extends Thread {
 		private Scanner s = new Scanner(System.in);
@@ -64,6 +65,7 @@ public class Server {
 		private Socket socket;
 		private ObjectOutputStream out;
 		private ObjectInputStream in;
+		private String name = "";
 		public ConnectedClient (Socket s) {
 			socket = s;
 			try {
@@ -71,6 +73,7 @@ public class Server {
 				in = new ObjectInputStream(socket.getInputStream());
 			} catch (IOException e) {
 				e.printStackTrace();
+				clients.remove(this);
 			}
 			start();
 		}
@@ -88,10 +91,40 @@ public class Server {
 					Message item = (Message)in.readObject();
 					if (item != null) {
 						if (item.type() == Message.message) {
-							sendMessage(item);
+							if (!name.equals("")) {
+								sendMessage(new Message(Message.message, name + ": " + (String)item.contents()));
+							}
+							else {
+								clients.remove(this);
+								socket.close();
+								break;
+							}
+						}
+						else if (item.type() == Message.name) {
+							if (name.equals("")) {
+								if (checkName((String)item.contents())) {
+									name = (String)(item.contents());
+									out.writeObject(new Message(Message.name, true));
+								}
+								else {
+									out.writeObject(new Message(Message.name, false));
+								}
+								out.flush();
+							}
+							else {
+								clients.remove(this);
+								socket.close();
+								break;
+							}
 						}
 					}
 				} catch (Exception e) {
+					clients.remove(this);
+					try {
+						socket.close();
+					} catch (Exception ex) {
+						socket = null;
+					}
 					break;
 				}
 			}

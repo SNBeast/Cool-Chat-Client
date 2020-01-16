@@ -14,36 +14,36 @@ import java.net.Socket;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.border.EtchedBorder;
 public class Client implements Runnable, KeyListener {
-	private JFrame frame = new JFrame();
+	public static final double version = 0.9;
+	private JFrame frame = new JFrame("Cool Chat Client");
 	private Container canvas = frame.getContentPane();
 	private JTextArea text = new JTextArea();
 	private JTextArea display = new JTextArea();
+	private JScrollPane scrollpane = new JScrollPane(display);
 	private String name = "";
 	private Socket socket;
 	private ObjectOutputStream out;
 	private ObjectInputStream in;
 	private Thread t;
+	private boolean astoggle = true;
 	public Client () {
 		text.addKeyListener(this);
+		display.setLineWrap(true);
+		display.setWrapStyleWord(true);
 		display.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
-		display.setPreferredSize(new Dimension(500, 600));
+		display.setSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
 		display.setEditable(false);
+		scrollpane.setPreferredSize(new Dimension(500, 600));
 		canvas.setLayout(new BorderLayout());
-		canvas.add(display, BorderLayout.CENTER);
+		canvas.add(scrollpane, BorderLayout.CENTER);
 		canvas.add(text, BorderLayout.SOUTH);
 		frame.pack();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.addWindowListener(new Closer());
-		frame.setTitle("Connecting");
-		while (true) {
-			name = JOptionPane.showInputDialog("What's your name?");
-			if (!name.equals("")) {
-				break;
-			}
-		}
 		String address = JOptionPane.showInputDialog("What is the IP of the server are you connecting to?");
 		int port = Integer.parseInt(JOptionPane.showInputDialog("What port are you connecting on?\nMust be between 1024 and 65535"));
 		frame.setVisible(true);
@@ -51,18 +51,36 @@ public class Client implements Runnable, KeyListener {
 			socket = new Socket(InetAddress.getByName(address), port);
 			out = new ObjectOutputStream(socket.getOutputStream());
 			in = new ObjectInputStream(socket.getInputStream());
+			nameCycle:
+			while (true) {
+				name = JOptionPane.showInputDialog("What's your name?");
+				if (!name.equals("")) {
+					out.writeObject(new Message(Message.name, name));
+					out.flush();
+					while (true) {
+						try {
+							Message item = (Message)in.readObject();
+							if (item != null) {
+								if (item.type() == Message.name) {
+									if ((Boolean)item.contents()) break nameCycle;
+									else break;
+								}
+							}
+						} catch (Exception e) {
+							System.out.println("Server unreachable");
+							System.exit(1);
+						}
+					} 
+				}
+			}
 			out.writeObject(new Message(Message.message, name + " has joined."));
 			out.flush();
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("Server unreachable");
 			System.exit(1);
 		}
-		frame.setTitle("Cool Chat Client");
 		t = new Thread(this);
 		t.run();
-	}
-	public static void main (String[] args) {
-		new Client();
 	}
 	public void run () {
 		while (true) {
@@ -71,6 +89,7 @@ public class Client implements Runnable, KeyListener {
 				if (item != null) {
 					if (item.type() == Message.message) {
 						display.append((String)item.contents() + "\n");
+						if (astoggle) scrollpane.getVerticalScrollBar().setValue(scrollpane.getVerticalScrollBar().getMaximum());
 					}
 				}
 			} catch (EOFException e) {
@@ -86,11 +105,18 @@ public class Client implements Runnable, KeyListener {
 		if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 			try {
 				String s = text.getText();
-				while (s.indexOf("\\n") != -1) {
-					s = s.substring(0, s.indexOf("\\n")) + "\n" + name + ": " + s.substring(s.indexOf("\\n") + 2);
+				if (s.charAt(0) == '!') {
+					if (s.equals("!help")) {
+						display.append("Commands:\n-!help: lists this command list\n!astoggle: toggles autoscrolling");
+					}
+					else if (s.equals("!astoggle")) {
+						astoggle ^= true;
+					}
 				}
-				out.writeObject(new Message(Message.message, name + ": " + s));
-				out.flush();
+				else {
+					out.writeObject(new Message(Message.message, s));
+					out.flush();
+				}
 				text.setText("");
 			} catch (IOException ex) {
 				ex.printStackTrace();
@@ -103,7 +129,7 @@ public class Client implements Runnable, KeyListener {
 	private class Closer extends WindowAdapter {
 		public void windowClosing (WindowEvent w) {
 			try {
-				out.writeObject(new Message(Message.message, name + " has left."));
+				out.writeObject(new Message(Message.message, " has left."));
 				out.flush();
 				socket.close();
 				System.exit(0);

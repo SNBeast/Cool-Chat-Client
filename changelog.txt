@@ -1,0 +1,24 @@
+v0.9 beta
+Client
+- changed main from Client to Updater
+- name is now handled server-side and checked if duplicate
+- removed the ability to post line spaces
+- implemented auto-updater
+- implemented word wrapping
+- implemented scrolling
+- implemented auto-scroll to bottom
+- implemented a command system
+- implemented !help
+- implemented !astoggle
+
+Server
+- changed main from Server to ServerUpdater
+
+v0.5 beta
+- initial version
+
+==================================================
+
+goals
+- list of people online (seperate window?)
+- ui that isn't eye cancer
