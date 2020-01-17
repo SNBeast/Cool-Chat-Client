@@ -1,3 +1,7 @@
+v0.9.1 beta
+Updater
+- disabled auto-update on client whose local IP starts with "10."
+
 v0.9 beta
 Client
 - changed main from Client to Updater
