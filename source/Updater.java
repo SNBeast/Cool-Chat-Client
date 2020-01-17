@@ -10,6 +10,7 @@ import javax.swing.JOptionPane;
 public class Updater {
 	private String link = "https://github.com/SNBeast/Cool-Chat-Client/releases/latest/download/";
 	private InputStream in;
+	private File version;
 	private File contents;
 	private String s = "";
 	private String option;
@@ -17,14 +18,17 @@ public class Updater {
 	public Updater () {
 		try {
 			download("version.txt");
-			reader = new BufferedReader(new FileReader(contents));
+			version = new File("version.txt");
+			reader = new BufferedReader(new FileReader(version));
 			if (Double.parseDouble(reader.readLine()) != Client.version) {
 				download("contents.txt");
 				contents = new File("contents.txt");
 				reader = new BufferedReader(new FileReader(contents));
 				while ((s = reader.readLine()) != null) download(s);
 				reader.close();
+				contents.delete();
 			}
+			version.delete();
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("\nReport to me ASAP");
