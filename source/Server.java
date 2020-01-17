@@ -105,6 +105,7 @@ public class Server {
 								if (checkName((String)item.contents())) {
 									name = (String)(item.contents());
 									out.writeObject(new Message(Message.name, true));
+									sendMessage(new Message(Message.message, name + " has joined."));
 								}
 								else {
 									out.writeObject(new Message(Message.name, false));
