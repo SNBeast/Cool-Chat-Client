@@ -54,7 +54,7 @@ public class Client implements Runnable, KeyListener {
 			nameCycle:
 			while (true) {
 				name = JOptionPane.showInputDialog("What's your name?");
-				if (!name.equals("")) {
+				if (!name.equals("") && name.matches("^[a-zA-Z0-9]*$")) {
 					out.writeObject(new Message(Message.name, name));
 					out.flush();
 					while (true) {

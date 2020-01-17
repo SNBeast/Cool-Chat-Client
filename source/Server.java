@@ -102,7 +102,7 @@ public class Server {
 						}
 						else if (item.type() == Message.name) {
 							if (name.equals("")) {
-								if (checkName((String)item.contents())) {
+								if (checkName((String)item.contents()) && ((String)item.contents()).matches("^[a-zA-Z0-9]*$")) {
 									name = (String)(item.contents());
 									out.writeObject(new Message(Message.name, true));
 									sendMessage(new Message(Message.message, name + " has joined."));
