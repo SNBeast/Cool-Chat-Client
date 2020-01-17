@@ -37,16 +37,20 @@ public class Updater {
 			System.out.println("\nReport to me ASAP");
 		}
 		while (true) {
-			option = JOptionPane.showInputDialog("Do you want to run Server or Client?");
-			if (option.toLowerCase().equals("server")) {
-				int port = Integer.parseInt(JOptionPane.showInputDialog("Enter the port to use (between 1024 and 65535)."));
-				int maxClients = Integer.parseInt(JOptionPane.showInputDialog("Enter the maximum clients to accept."));
-				new Server(port, maxClients);
-				break;
-			}
-			else if (option.toLowerCase().equals("client")) {
-				new Client();
-				break;
+			try {
+				option = JOptionPane.showInputDialog("Do you want to run Server or Client?");
+				if (option.toLowerCase().equals("server")) {
+					int port = Integer.parseInt(JOptionPane.showInputDialog("Enter the port to use (between 1024 and 65535)."));
+					int maxClients = Integer.parseInt(JOptionPane.showInputDialog("Enter the maximum clients to accept."));
+					new Server(port, maxClients);
+					break;
+				}
+				else if (option.toLowerCase().equals("client")) {
+					new Client();
+					break;
+				}
+			} catch (NullPointerException e) {
+				System.exit(0);
 			}
 		}
 	}
@@ -61,9 +65,11 @@ public class Updater {
 			new File(fileName).delete();
 			download(fileName);
 		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("\nThe update cannot be run. Check internet conditions. If fine, report to me ASAP");
-			System.exit(1);
+			if (!fileName.equals("Updater.class")) {
+				e.printStackTrace();
+				System.out.println("\nThe update cannot be run. Check internet conditions. If fine, report to me ASAP");
+				System.exit(1);
+			}
 		}
 	}
 	public static void main (String[] args) {
