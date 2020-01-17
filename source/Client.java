@@ -18,7 +18,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.border.EtchedBorder;
 public class Client implements Runnable, KeyListener {
-	public static final double version = 0.9;
+	public static final double version = 0.91;
 	private JFrame frame = new JFrame("Cool Chat Client");
 	private Container canvas = frame.getContentPane();
 	private JTextArea text = new JTextArea();
@@ -73,8 +73,6 @@ public class Client implements Runnable, KeyListener {
 					} 
 				}
 			}
-			out.writeObject(new Message(Message.message, name + " has joined."));
-			out.flush();
 		} catch (IOException e) {
 			System.out.println("Server unreachable");
 			System.exit(1);
