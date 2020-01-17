@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.net.URI;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
@@ -17,18 +18,20 @@ public class Updater {
 	private BufferedReader reader;
 	public Updater () {
 		try {
-			download("version.txt");
-			version = new File("version.txt");
-			reader = new BufferedReader(new FileReader(version));
-			if (Double.parseDouble(reader.readLine()) != Client.version) {
-				download("contents.txt");
-				contents = new File("contents.txt");
-				reader = new BufferedReader(new FileReader(contents));
-				while ((s = reader.readLine()) != null) download(s);
-				reader.close();
-				contents.delete();
+			if (!InetAddress.getLocalHost().getHostAddress().substring(0, 3).equals("10.")) {
+				download("version.txt");
+				version = new File("version.txt");
+				reader = new BufferedReader(new FileReader(version));
+				if (Double.parseDouble(reader.readLine()) != Client.version) {
+					download("contents.txt");
+					contents = new File("contents.txt");
+					reader = new BufferedReader(new FileReader(contents));
+					while ((s = reader.readLine()) != null) download(s);
+					reader.close();
+					contents.delete();
+				}
+				version.delete();
 			}
-			version.delete();
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("\nReport to me ASAP");
