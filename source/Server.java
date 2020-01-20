@@ -57,6 +57,9 @@ public class Server {
 						} catch (IOException e) {e.printStackTrace();}
 						System.exit(0);
 					}
+					else {
+						System.out.println("Unknown command.");
+					}
 				}
 			}
 		}

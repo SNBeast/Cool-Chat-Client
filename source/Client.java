@@ -1,6 +1,8 @@
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
@@ -14,10 +16,12 @@ import java.net.Socket;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.Timer;
 import javax.swing.border.EtchedBorder;
-public class Client implements Runnable, KeyListener {
+public class Client implements Runnable, KeyListener, ActionListener {
 	public static final double version = 0.91;
 	private JFrame frame = new JFrame("Cool Chat Client");
 	private Container canvas = frame.getContentPane();
@@ -30,6 +34,7 @@ public class Client implements Runnable, KeyListener {
 	private ObjectInputStream in;
 	private Thread t;
 	private boolean astoggle = true;
+	private Timer timer = new Timer(100, this);
 	public Client () {
 		text.addKeyListener(this);
 		display.setLineWrap(true);
@@ -81,13 +86,14 @@ public class Client implements Runnable, KeyListener {
 		t.run();
 	}
 	public void run () {
+		display.append("Client opened.");
+		timer.start();
 		while (true) {
 			try {
 				Message item = (Message)in.readObject();
 				if (item != null) {
 					if (item.type() == Message.message) {
 						display.append("\n" + (String)item.contents());
-						if (astoggle) scrollpane.getVerticalScrollBar().setValue(scrollpane.getVerticalScrollBar().getMaximum());
 					}
 				}
 			} catch (EOFException e) {
@@ -103,20 +109,25 @@ public class Client implements Runnable, KeyListener {
 		if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 			try {
 				String s = text.getText();
-				if (s.charAt(0) == '!') {
-					if (s.equals("!help")) {
-						display.append("\nCommands:\n-!help: lists this command list\n!astoggle: toggles autoscrolling");
-					}
-					else if (s.equals("!astoggle")) {
-						astoggle ^= true;
+				if (!s.equals("")) {
+					if (s.charAt(0) == '!') {
+						if (s.equals("!help")) {
+							display.append("\nCommands:\n- !help: displays this command list\n- !astoggle: toggles autoscrolling");
+						}
+						else if (s.equals("!astoggle")) {
+							astoggle ^= true;
+							if (astoggle) timer.restart();
+							else timer.stop();
+							display.append("\nAutoscrolling set to " + astoggle);
+						}
+						else {
+							display.append("\nUnknown command.");
+						}
 					}
 					else {
-						display.append("\nUnknown command.");
+						out.writeObject(new Message(Message.message, s));
+						out.flush();
 					}
-				}
-				else {
-					out.writeObject(new Message(Message.message, s));
-					out.flush();
 				}
 				text.setText("");
 			} catch (IOException ex) {
@@ -127,6 +138,10 @@ public class Client implements Runnable, KeyListener {
 	}
 	public void keyTyped (KeyEvent e) {}
 	public void keyReleased (KeyEvent e) {}
+	public void actionPerformed(ActionEvent e) {
+		JScrollBar s = scrollpane.getVerticalScrollBar();
+		s.setValue(s.getMaximum());
+	}
 	private class Closer extends WindowAdapter {
 		public void windowClosing (WindowEvent w) {
 			try {
