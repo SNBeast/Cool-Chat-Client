@@ -86,7 +86,7 @@ public class Client implements Runnable, KeyListener {
 				Message item = (Message)in.readObject();
 				if (item != null) {
 					if (item.type() == Message.message) {
-						display.append((String)item.contents() + "\n");
+						display.append("\n" + (String)item.contents());
 						if (astoggle) scrollpane.getVerticalScrollBar().setValue(scrollpane.getVerticalScrollBar().getMaximum());
 					}
 				}
@@ -105,13 +105,13 @@ public class Client implements Runnable, KeyListener {
 				String s = text.getText();
 				if (s.charAt(0) == '!') {
 					if (s.equals("!help")) {
-						display.append("Commands:\n-!help: lists this command list\n!astoggle: toggles autoscrolling");
+						display.append("\nCommands:\n-!help: lists this command list\n!astoggle: toggles autoscrolling");
 					}
 					else if (s.equals("!astoggle")) {
 						astoggle ^= true;
 					}
 					else {
-						display.append("Unknown command.");
+						display.append("\nUnknown command.");
 					}
 				}
 				else {
