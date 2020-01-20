@@ -110,6 +110,9 @@ public class Client implements Runnable, KeyListener {
 					else if (s.equals("!astoggle")) {
 						astoggle ^= true;
 					}
+					else {
+						display.append("Unknown command.");
+					}
 				}
 				else {
 					out.writeObject(new Message(Message.message, s));
