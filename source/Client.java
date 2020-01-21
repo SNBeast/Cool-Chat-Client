@@ -22,7 +22,7 @@ import javax.swing.JTextArea;
 import javax.swing.Timer;
 import javax.swing.border.EtchedBorder;
 public class Client implements Runnable, KeyListener, ActionListener {
-	public static final double version = 0.91;
+	public static final double version = 0.95;
 	private JFrame frame = new JFrame("Cool Chat Client");
 	private Container canvas = frame.getContentPane();
 	private JTextArea text = new JTextArea();
