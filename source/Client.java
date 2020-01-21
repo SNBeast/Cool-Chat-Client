@@ -37,6 +37,8 @@ public class Client implements Runnable, KeyListener, ActionListener {
 	private Timer timer = new Timer(100, this);
 	public Client () {
 		text.addKeyListener(this);
+		text.setLineWrap(true);
+		text.setWrapStyleWord(true);
 		display.setLineWrap(true);
 		display.setWrapStyleWord(true);
 		display.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
