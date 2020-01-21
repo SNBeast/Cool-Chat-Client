@@ -49,7 +49,7 @@ public class Updater {
 					new Client();
 					break;
 				}
-			} catch (NullPointerException e) {
+			} catch (Exception e) {
 				System.exit(0);
 			}
 		}
