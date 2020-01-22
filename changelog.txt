@@ -16,7 +16,7 @@ Client
 - implemented !astoggle
 
 Server
-- changed main from Server to ServerUpdater
+- changed main from Server to Updater
 
 v0.5 beta
 - initial version
