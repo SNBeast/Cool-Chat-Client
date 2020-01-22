@@ -1,3 +1,13 @@
+v0.9.5 beta
+Client
+- added list of people online
+- added !online
+- fixed duplicate name display on join
+- names must be alphanumeric
+- fixed line spacing being off
+- added word wrapping to text box
+- blah I DON'T LIKE CHANGE(logs)
+
 v0.9.1 beta
 Updater
 - disabled auto-update on client whose local IP starts with "10."
@@ -24,5 +34,5 @@ v0.5 beta
 ==================================================
 
 goals
-- list of people online (seperate window?)
+- ping system
 - ui that isn't eye cancer
