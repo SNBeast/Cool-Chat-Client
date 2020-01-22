@@ -1,3 +1,5 @@
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -6,9 +8,11 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Scanner;
-public class Server {
+import javax.swing.Timer;
+public class Server implements ActionListener {
 	private ServerSocket serverSocket;
 	private ArrayList<ConnectedClient> clients = new ArrayList<ConnectedClient>();
+	private Timer t = new Timer (1000, this);
 	public Server (int port, int maxClients) {
 		try {
 			serverSocket = new ServerSocket(port, maxClients);
@@ -18,6 +22,7 @@ public class Server {
 			System.exit(1);
 		}
 		new ServerShell(this);
+		t.start();
 		while (true) {
 			try {
 				clients.add(new ConnectedClient(serverSocket.accept()));
@@ -38,6 +43,13 @@ public class Server {
 			}
 		}
 		return true;
+	}
+	public void actionPerformed(ActionEvent e) {
+		String[] nameList = new String[clients.size()];
+		for (int i = 0; i < clients.size(); i++) {
+			nameList[i] = clients.get(i).name;
+		}
+		sendMessage(new Message(Message.nameList, nameList));
 	}
 	private class ServerShell extends Thread {
 		private Scanner s = new Scanner(System.in);

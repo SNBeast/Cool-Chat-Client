@@ -3,6 +3,7 @@ public class Message implements Serializable {
 	private static final long serialVersionUID = 1L;
 	public static final byte message = 0;
 	public static final byte name = 1;
+	public static final byte nameList = 2;
 	private byte type;
 	private Object contents;
 	public Message (byte type, Object contents) {

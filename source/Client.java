@@ -24,10 +24,13 @@ import javax.swing.border.EtchedBorder;
 public class Client implements Runnable, KeyListener, ActionListener {
 	public static final double version = 0.95;
 	private JFrame frame = new JFrame("Cool Chat Client");
+	private JFrame online = new JFrame("List of online people");
 	private Container canvas = frame.getContentPane();
 	private JTextArea text = new JTextArea();
 	private JTextArea display = new JTextArea();
+	private JTextArea people = new JTextArea();
 	private JScrollPane scrollpane = new JScrollPane(display);
+	private JScrollPane onlineScroll = new JScrollPane(people);
 	private String name = "";
 	private Socket socket;
 	private ObjectOutputStream out;
@@ -51,6 +54,11 @@ public class Client implements Runnable, KeyListener, ActionListener {
 		frame.pack();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.addWindowListener(new Closer());
+		people.setSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
+		onlineScroll.setPreferredSize(new Dimension(200, 300));
+		people.setEditable(false);
+		online.add(onlineScroll);
+		online.pack();
 		String address = JOptionPane.showInputDialog("What is the IP of the server are you connecting to?");
 		int port = Integer.parseInt(JOptionPane.showInputDialog("What port are you connecting on?\nMust be between 1024 and 65535"));
 		frame.setVisible(true);
@@ -61,7 +69,7 @@ public class Client implements Runnable, KeyListener, ActionListener {
 			nameCycle:
 			while (true) {
 				name = JOptionPane.showInputDialog("What's your name?");
-				if (!name.equals("") && name.matches("^[a-zA-Z0-9]*$")) {
+				if (!name.equals("") && name.matches("^[a-zA-Z0-9]*$") && name.length() <= 32) {
 					out.writeObject(new Message(Message.name, name));
 					out.flush();
 					while (true) {
@@ -84,11 +92,12 @@ public class Client implements Runnable, KeyListener, ActionListener {
 			System.out.println("Server unreachable");
 			System.exit(1);
 		}
+		online.setVisible(true);
 		t = new Thread(this);
 		t.run();
 	}
 	public void run () {
-		display.append("Client opened.");
+		display.append("Connected to server.");
 		timer.start();
 		while (true) {
 			try {
@@ -96,6 +105,15 @@ public class Client implements Runnable, KeyListener, ActionListener {
 				if (item != null) {
 					if (item.type() == Message.message) {
 						display.append("\n" + (String)item.contents());
+					}
+					else if (item.type() == Message.nameList) {
+						people.setText("People online: ");
+						String[] names = (String[])item.contents();
+						for (int i = 0; i < names.length; i++) {
+							if (names[i] != null) {
+								people.setText(people.getText() + "\n" + names[i]);
+							}
+						}
 					}
 				}
 			} catch (EOFException e) {
@@ -114,13 +132,23 @@ public class Client implements Runnable, KeyListener, ActionListener {
 				if (!s.equals("")) {
 					if (s.charAt(0) == '!') {
 						if (s.equals("!help")) {
-							display.append("\nCommands:\n- !help: displays this command list\n- !astoggle: toggles autoscrolling");
+							display.append("\nCommands:"
+									+ "\n- !help: displays this command list"
+									+ "\n- !astoggle: toggles autoscrolling"
+									+ "\n- !online: puts window of online people back up");
 						}
 						else if (s.equals("!astoggle")) {
 							astoggle ^= true;
 							if (astoggle) timer.restart();
 							else timer.stop();
 							display.append("\nAutoscrolling set to " + astoggle);
+						}
+						else if (s.equals("!online")) {
+							if (!online.isVisible()) {
+								online.setVisible(true);
+								display.append("\nWindow of people online made visible.");
+							}
+							else display.append("\nWindow of people online already visible.");
 						}
 						else {
 							display.append("\nUnknown command.");
